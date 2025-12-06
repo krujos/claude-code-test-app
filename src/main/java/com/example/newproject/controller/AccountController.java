@@ -2,6 +2,7 @@ package com.example.newproject.controller;
 
 import com.example.newproject.model.Account;
 import com.example.newproject.service.AccountService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,13 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-        Account created = accountService.createAccount(account);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<?> createAccount(@RequestBody Account account) {
+        try {
+            Account created = accountService.createAccount(account);
+            return ResponseEntity.ok(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

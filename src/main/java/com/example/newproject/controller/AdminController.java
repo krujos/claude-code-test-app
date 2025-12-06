@@ -2,6 +2,7 @@ package com.example.newproject.controller;
 
 import com.example.newproject.model.Account;
 import com.example.newproject.service.AccountService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +29,13 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(@PathVariable Long id, @RequestBody Account account) {
-        Account updated = accountService.updateAccount(id, account);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody Account account) {
+        try {
+            Account updated = accountService.updateAccount(id, account);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

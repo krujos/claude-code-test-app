@@ -7,6 +7,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/libphonenumber-js@1.10.53/bundle/libphonenumber-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Archivo:wght@400;700&display=swap');
 
@@ -23,6 +24,7 @@
             --gulf-dark: #0D2847;
             --racing-white: #F8F9FA;
             --checkered: #1A1A1A;
+            --error-red: #e74c3c;
         }
 
         body {
@@ -140,6 +142,12 @@
             margin-bottom: 1.5rem;
         }
 
+        .phone-input-group {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 1rem;
+        }
+
         label {
             display: block;
             margin-bottom: 0.5rem;
@@ -152,7 +160,8 @@
 
         input[type="text"],
         input[type="password"],
-        input[type="tel"] {
+        input[type="tel"],
+        select {
             width: 100%;
             padding: 1rem;
             border: 3px solid var(--gulf-blue);
@@ -163,11 +172,32 @@
             background: white;
         }
 
-        input:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: var(--gulf-orange);
             box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
             transform: translateY(-2px);
+        }
+
+        input.error {
+            border-color: var(--error-red);
+            background: #ffe6e6;
+        }
+
+        .field-error {
+            color: var(--error-red);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .field-error::before {
+            content: '⚠';
+            font-size: 1.2rem;
         }
 
         .btn {
@@ -184,13 +214,18 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, var(--gulf-orange) 0%, #FF8C5A 100%);
             color: white;
             border: 3px solid var(--gulf-orange);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 6px 25px rgba(255, 107, 53, 0.4);
         }
@@ -201,12 +236,12 @@
             border: 3px solid var(--gulf-blue);
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 6px 25px rgba(26, 76, 139, 0.4);
         }
 
-        .btn:active {
+        .btn:active:not(:disabled) {
             transform: translateY(-1px);
         }
 
@@ -327,6 +362,10 @@
             .card {
                 padding: 1.5rem;
             }
+
+            .phone-input-group {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -335,6 +374,143 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
+        const { parsePhoneNumber, getExampleNumber, AsYouType } = window.libphonenumber;
+
+        // Common countries with their calling codes
+        const COUNTRIES = [
+            { code: 'US', name: 'United States', flag: '🇺🇸', callingCode: '+1' },
+            { code: 'CA', name: 'Canada', flag: '🇨🇦', callingCode: '+1' },
+            { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', callingCode: '+44' },
+            { code: 'DE', name: 'Germany', flag: '🇩🇪', callingCode: '+49' },
+            { code: 'FR', name: 'France', flag: '🇫🇷', callingCode: '+33' },
+            { code: 'IT', name: 'Italy', flag: '🇮🇹', callingCode: '+39' },
+            { code: 'ES', name: 'Spain', flag: '🇪🇸', callingCode: '+34' },
+            { code: 'MX', name: 'Mexico', flag: '🇲🇽', callingCode: '+52' },
+            { code: 'JP', name: 'Japan', flag: '🇯🇵', callingCode: '+81' },
+            { code: 'AU', name: 'Australia', flag: '🇦🇺', callingCode: '+61' },
+        ];
+
+        function PhoneInput({ value, onChange, country, onCountryChange, error, setError }) {
+            const [displayValue, setDisplayValue] = useState('');
+
+            useEffect(() => {
+                // Initialize display value when value changes from outside
+                if (value && !displayValue) {
+                    setDisplayValue(value);
+                }
+            }, [value]);
+
+            const formatPhoneNumber = (input, countryCode) => {
+                try {
+                    const formatter = new AsYouType(countryCode);
+                    const formatted = formatter.input(input);
+                    return formatted;
+                } catch (e) {
+                    return input;
+                }
+            };
+
+            const validatePhoneNumber = (phoneNumber, countryCode) => {
+                if (!phoneNumber || phoneNumber.length === 0) {
+                    return { isValid: true, error: null };
+                }
+
+                try {
+                    const parsed = parsePhoneNumber(phoneNumber, countryCode);
+                    if (parsed && parsed.isValid()) {
+                        return { isValid: true, error: null };
+                    } else {
+                        return {
+                            isValid: false,
+                            error: `Invalid ${COUNTRIES.find(c => c.code === countryCode)?.name || countryCode} phone number format`
+                        };
+                    }
+                } catch (e) {
+                    const example = getExampleNumber(countryCode, window.libphonenumber.examples);
+                    const exampleFormatted = example ? example.formatNational() : '';
+                    return {
+                        isValid: false,
+                        error: `Invalid phone number. Expected format: ${exampleFormatted}`
+                    };
+                }
+            };
+
+            const handlePhoneChange = (e) => {
+                const input = e.target.value;
+
+                // Only allow digits, spaces, parentheses, hyphens, and plus signs
+                const cleanInput = input.replace(/[^\d\s()\-+]/g, '');
+
+                // Prevent input if it contains invalid characters
+                if (input !== cleanInput) {
+                    setError('Only numbers and formatting characters ()+- are allowed');
+                    return;
+                }
+
+                // Format as user types
+                const formatted = formatPhoneNumber(cleanInput, country);
+                setDisplayValue(formatted);
+
+                // Validate
+                const validation = validatePhoneNumber(formatted, country);
+
+                if (validation.isValid) {
+                    setError(null);
+                    // Store the formatted value
+                    onChange(formatted);
+                } else {
+                    setError(validation.error);
+                    // Still update the value so user can see what they're typing
+                    onChange(formatted);
+                }
+            };
+
+            const handleCountryChange = (e) => {
+                const newCountry = e.target.value;
+                onCountryChange(newCountry);
+
+                // Re-validate with new country
+                if (displayValue) {
+                    const validation = validatePhoneNumber(displayValue, newCountry);
+                    setError(validation.error);
+                }
+            };
+
+            const getPlaceholder = () => {
+                try {
+                    const example = getExampleNumber(country, window.libphonenumber.examples);
+                    return example ? example.formatNational() : '(###) ###-####';
+                } catch (e) {
+                    return '(###) ###-####';
+                }
+            };
+
+            return (
+                <div className="phone-input-group">
+                    <div className="form-group" style={{marginBottom: 0}}>
+                        <label>Country</label>
+                        <select value={country} onChange={handleCountryChange}>
+                            {COUNTRIES.map(c => (
+                                <option key={c.code} value={c.code}>
+                                    {c.flag} {c.name} ({c.callingCode})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group" style={{marginBottom: 0}}>
+                        <label>Phone Number</label>
+                        <input
+                            type="tel"
+                            value={displayValue}
+                            onChange={handlePhoneChange}
+                            placeholder={getPlaceholder()}
+                            className={error ? 'error' : ''}
+                            required
+                        />
+                    </div>
+                </div>
+            );
+        }
 
         function App() {
             const [activeTab, setActiveTab] = useState('create');
@@ -344,6 +520,8 @@
                 phoneNumber: '',
                 address: ''
             });
+            const [country, setCountry] = useState('US');
+            const [phoneError, setPhoneError] = useState(null);
             const [adminPassword, setAdminPassword] = useState('');
             const [accounts, setAccounts] = useState([]);
             const [message, setMessage] = useState(null);
@@ -374,8 +552,23 @@
                 });
             };
 
+            const handlePhoneChange = (value) => {
+                setFormData({
+                    ...formData,
+                    phoneNumber: value
+                });
+            };
+
             const createAccount = async (e) => {
                 e.preventDefault();
+
+                // Final validation before submit
+                if (phoneError) {
+                    setMessage({ type: 'error', text: 'Please fix phone number errors before submitting' });
+                    setTimeout(() => setMessage(null), 5000);
+                    return;
+                }
+
                 try {
                     const response = await fetch('/api/accounts', {
                         method: 'POST',
@@ -394,8 +587,10 @@
                             phoneNumber: '',
                             address: ''
                         });
+                        setPhoneError(null);
                     } else {
-                        setMessage({ type: 'error', text: 'Failed to create account' });
+                        const errorText = await response.text();
+                        setMessage({ type: 'error', text: 'Failed to create account: ' + errorText });
                     }
                 } catch (error) {
                     setMessage({ type: 'error', text: 'Error: ' + error.message });
@@ -429,6 +624,12 @@
             };
 
             const updateAccount = async (id) => {
+                if (phoneError) {
+                    setMessage({ type: 'error', text: 'Please fix phone number errors before updating' });
+                    setTimeout(() => setMessage(null), 5000);
+                    return;
+                }
+
                 try {
                     const response = await fetch(`/api/admin/accounts/${id}`, {
                         method: 'PUT',
@@ -449,7 +650,11 @@
                             phoneNumber: '',
                             address: ''
                         });
+                        setPhoneError(null);
                         setMessage({ type: 'success', text: 'Account updated successfully!' });
+                    } else {
+                        const errorText = await response.text();
+                        setMessage({ type: 'error', text: 'Update failed: ' + errorText });
                     }
                 } catch (error) {
                     setMessage({ type: 'error', text: 'Update failed: ' + error.message });
@@ -488,6 +693,7 @@
                     phoneNumber: account.phoneNumber,
                     address: account.address
                 });
+                setPhoneError(null);
             };
 
             const cancelEdit = () => {
@@ -498,6 +704,7 @@
                     phoneNumber: '',
                     address: ''
                 });
+                setPhoneError(null);
             };
 
             return (
@@ -557,14 +764,17 @@
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Phone Number</label>
-                                    <input
-                                        type="tel"
-                                        name="phoneNumber"
+                                    <PhoneInput
                                         value={formData.phoneNumber}
-                                        onChange={handleInputChange}
-                                        required
+                                        onChange={handlePhoneChange}
+                                        country={country}
+                                        onCountryChange={setCountry}
+                                        error={phoneError}
+                                        setError={setPhoneError}
                                     />
+                                    {phoneError && (
+                                        <div className="field-error">{phoneError}</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
                                     <label>Address</label>
@@ -576,7 +786,7 @@
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="btn btn-primary">
+                                <button type="submit" className="btn btn-primary" disabled={phoneError !== null}>
                                     Create Account
                                 </button>
                             </form>
@@ -648,13 +858,17 @@
                                                             />
                                                         </div>
                                                         <div className="form-group">
-                                                            <label>Phone</label>
-                                                            <input
-                                                                type="tel"
-                                                                name="phoneNumber"
+                                                            <PhoneInput
                                                                 value={formData.phoneNumber}
-                                                                onChange={handleInputChange}
+                                                                onChange={handlePhoneChange}
+                                                                country={country}
+                                                                onCountryChange={setCountry}
+                                                                error={phoneError}
+                                                                setError={setPhoneError}
                                                             />
+                                                            {phoneError && (
+                                                                <div className="field-error">{phoneError}</div>
+                                                            )}
                                                         </div>
                                                         <div className="form-group">
                                                             <label>Address</label>
@@ -670,6 +884,7 @@
                                                                 onClick={() => updateAccount(account.id)}
                                                                 className="btn btn-secondary"
                                                                 style={{flex: 1}}
+                                                                disabled={phoneError !== null}
                                                             >
                                                                 Save
                                                             </button>
