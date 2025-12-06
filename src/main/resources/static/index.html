@@ -8,6 +8,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/libphonenumber-js@1.10.53/bundle/libphonenumber-min.js"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&loading=async&callback=initMap"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Archivo:wght@400;700&display=swap');
 
@@ -372,8 +373,15 @@
 <body>
     <div id="root"></div>
 
+    <script>
+        // Callback for Google Maps API
+        window.initMap = function() {
+            window.googleMapsLoaded = true;
+        };
+    </script>
+
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
         const { parsePhoneNumber, getExampleNumber, AsYouType } = window.libphonenumber;
 
         // Common countries with their calling codes
@@ -509,6 +517,73 @@
                         />
                     </div>
                 </div>
+            );
+        }
+
+        function AddressAutocomplete({ value, onChange }) {
+            const inputRef = useRef(null);
+            const autocompleteRef = useRef(null);
+            const [isLoaded, setIsLoaded] = useState(false);
+
+            useEffect(() => {
+                // Wait for Google Maps to load
+                const checkGoogleMaps = () => {
+                    if (window.google && window.google.maps && window.google.maps.places) {
+                        setIsLoaded(true);
+                    } else {
+                        setTimeout(checkGoogleMaps, 100);
+                    }
+                };
+                checkGoogleMaps();
+            }, []);
+
+            useEffect(() => {
+                if (!inputRef.current || !isLoaded || !window.google) return;
+
+                // Initialize Google Places Autocomplete
+                autocompleteRef.current = new window.google.maps.places.Autocomplete(
+                    inputRef.current,
+                    {
+                        types: ['address'],
+                        fields: ['formatted_address', 'address_components', 'geometry']
+                    }
+                );
+
+                // Listen for place selection
+                autocompleteRef.current.addListener('place_changed', () => {
+                    const place = autocompleteRef.current.getPlace();
+                    if (place.formatted_address) {
+                        onChange(place.formatted_address);
+                    }
+                });
+
+                return () => {
+                    if (autocompleteRef.current) {
+                        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+                    }
+                };
+            }, [isLoaded]);
+
+            // Update input value when value prop changes
+            useEffect(() => {
+                if (inputRef.current && value !== inputRef.current.value) {
+                    inputRef.current.value = value;
+                }
+            }, [value]);
+
+            const handleChange = (e) => {
+                onChange(e.target.value);
+            };
+
+            return (
+                <input
+                    ref={inputRef}
+                    type="text"
+                    value={value}
+                    onChange={handleChange}
+                    placeholder="Start typing an address..."
+                    required
+                />
             );
         }
 
@@ -778,12 +853,9 @@
                                 </div>
                                 <div className="form-group">
                                     <label>Address</label>
-                                    <input
-                                        type="text"
-                                        name="address"
+                                    <AddressAutocomplete
                                         value={formData.address}
-                                        onChange={handleInputChange}
-                                        required
+                                        onChange={(address) => setFormData({...formData, address})}
                                     />
                                 </div>
                                 <button type="submit" className="btn btn-primary" disabled={phoneError !== null}>
@@ -872,11 +944,9 @@
                                                         </div>
                                                         <div className="form-group">
                                                             <label>Address</label>
-                                                            <input
-                                                                type="text"
-                                                                name="address"
+                                                            <AddressAutocomplete
                                                                 value={formData.address}
-                                                                onChange={handleInputChange}
+                                                                onChange={(address) => setFormData({...formData, address})}
                                                             />
                                                         </div>
                                                         <div className="button-group">
