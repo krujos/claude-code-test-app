@@ -2,6 +2,7 @@ package com.example.newproject.controller;
 
 import com.example.newproject.model.Account;
 import com.example.newproject.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody Account account) {
+    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody @Valid Account account) {
         try {
             Account updated = accountService.updateAccount(id, account);
             return ResponseEntity.ok(updated);

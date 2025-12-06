@@ -79,7 +79,7 @@ class AccountControllerTest {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(400, response.statusCode());
-        assertTrue(response.body().contains("Invalid phone number format"));
+        assertTrue(response.body().contains("Phone number must be in format"));
     }
 
     @Test
