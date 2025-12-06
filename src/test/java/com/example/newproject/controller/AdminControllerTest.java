@@ -43,7 +43,7 @@ class AdminControllerTest {
     }
 
     private String getBasicAuthHeader() {
-        String auth = "test:test";
+        String auth = "admin:password";
         return "Basic " + java.util.Base64.getEncoder().encodeToString(auth.getBytes());
     }
 
@@ -62,9 +62,10 @@ class AdminControllerTest {
         accountRepository.save(account2);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/admin/accounts"))
-                .GET()
-                .build();
+            .uri(URI.create(baseUrl + "/api/admin/accounts"))
+            .header("Authorization", getBasicAuthHeader())
+            .GET()
+            .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -79,9 +80,10 @@ class AdminControllerTest {
     @Test
     void testGetAllAccountsReturnsEmptyList() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/admin/accounts"))
-                .GET()
-                .build();
+            .uri(URI.create(baseUrl + "/api/admin/accounts"))
+            .header("Authorization", getBasicAuthHeader())
+            .GET()
+            .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -98,7 +100,8 @@ class AdminControllerTest {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/admin/accounts/" + saved.getId()))
-                .GET()
+            .header("Authorization", getBasicAuthHeader())
+            .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -129,6 +132,7 @@ class AdminControllerTest {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/admin/accounts/" + saved.getId()))
                 .header("Content-Type", "application/json")
+            .header("Authorization", getBasicAuthHeader())
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
@@ -154,6 +158,7 @@ class AdminControllerTest {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/admin/accounts/1"))
                 .header("Content-Type", "application/json")
+            .header("Authorization", getBasicAuthHeader())
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
@@ -170,7 +175,8 @@ class AdminControllerTest {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/admin/accounts/" + saved.getId()))
-                .DELETE()
+            .header("Authorization", getBasicAuthHeader())
+            .DELETE()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
