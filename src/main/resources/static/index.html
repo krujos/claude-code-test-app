@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gulf Racing - Account Management</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Archivo:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gulf-blue: #1A4C8B;
+            --gulf-light-blue: #65C5F1;
+            --gulf-orange: #FF6B35;
+            --gulf-dark: #0D2847;
+            --racing-white: #F8F9FA;
+            --checkered: #1A1A1A;
+        }
+
+        body {
+            font-family: 'Archivo', sans-serif;
+            background: linear-gradient(135deg, var(--gulf-dark) 0%, var(--gulf-blue) 100%);
+            min-height: 100vh;
+            color: var(--racing-white);
+            overflow-x: hidden;
+        }
+
+        /* Checkered flag pattern background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            background-image:
+                linear-gradient(45deg, var(--checkered) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checkered) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checkered) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checkered) 75%);
+            background-size: 40px 40px;
+            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-family: 'Racing Sans One', cursive;
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--gulf-light-blue), var(--gulf-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 107, 53, 0.3);
+            margin-bottom: 0.5rem;
+            letter-spacing: 3px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--gulf-light-blue);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .racing-stripe {
+            height: 6px;
+            background: linear-gradient(90deg,
+                var(--gulf-blue) 0%,
+                var(--gulf-light-blue) 25%,
+                var(--gulf-orange) 50%,
+                var(--gulf-light-blue) 75%,
+                var(--gulf-blue) 100%
+            );
+            margin: 2rem 0;
+            border-radius: 3px;
+            box-shadow: 0 0 20px rgba(101, 197, 241, 0.5);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.3),
+                inset 0 -3px 0 var(--gulf-orange);
+            color: var(--gulf-dark);
+            animation: fadeInUp 0.6s ease-out;
+            border: 3px solid var(--gulf-blue);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: var(--gulf-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 1rem;
+            border: 3px solid var(--gulf-blue);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Archivo', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--gulf-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Racing Sans One', cursive;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gulf-orange) 0%, #FF8C5A 100%);
+            color: white;
+            border: 3px solid var(--gulf-orange);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--gulf-blue) 0%, var(--gulf-light-blue) 100%);
+            color: white;
+            border: 3px solid var(--gulf-blue);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(26, 76, 139, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .account-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .account-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 6px solid var(--gulf-orange);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .account-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .account-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--gulf-blue);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--gulf-dark);
+            font-weight: 400;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid transparent;
+            border-radius: 12px;
+            color: var(--racing-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab.active {
+            background: var(--gulf-orange);
+            border-color: var(--gulf-orange);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+            border: 3px solid #27ae60;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+            border: 3px solid #c0392b;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .edit-mode {
+            border-left-color: var(--gulf-light-blue);
+            background: #f0f8ff;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('create');
+            const [formData, setFormData] = useState({
+                firstName: '',
+                lastName: '',
+                phoneNumber: '',
+                address: ''
+            });
+            const [adminPassword, setAdminPassword] = useState('');
+            const [accounts, setAccounts] = useState([]);
+            const [message, setMessage] = useState(null);
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [editingId, setEditingId] = useState(null);
+
+            // SSE for live updates
+            useEffect(() => {
+                const eventSource = new EventSource('/api/accounts/stream');
+
+                eventSource.onmessage = (event) => {
+                    const account = JSON.parse(event.data);
+                    console.log('Received account:', account);
+                };
+
+                eventSource.onerror = (error) => {
+                    console.log('SSE Error:', error);
+                    eventSource.close();
+                };
+
+                return () => eventSource.close();
+            }, []);
+
+            const handleInputChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            const createAccount = async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch('/api/accounts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        const newAccount = await response.json();
+                        setMessage({ type: 'success', text: `Account created successfully! ID: ${newAccount.id}` });
+                        setFormData({
+                            firstName: '',
+                            lastName: '',
+                            phoneNumber: '',
+                            address: ''
+                        });
+                    } else {
+                        setMessage({ type: 'error', text: 'Failed to create account' });
+                    }
+                } catch (error) {
+                    setMessage({ type: 'error', text: 'Error: ' + error.message });
+                }
+
+                setTimeout(() => setMessage(null), 5000);
+            };
+
+            const loginAdmin = async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch('/api/admin/accounts', {
+                        headers: {
+                            'Authorization': 'Basic ' + btoa('admin:' + adminPassword)
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setAccounts(data);
+                        setIsAuthenticated(true);
+                        setMessage({ type: 'success', text: 'Login successful!' });
+                    } else {
+                        setMessage({ type: 'error', text: 'Invalid password' });
+                    }
+                } catch (error) {
+                    setMessage({ type: 'error', text: 'Login failed: ' + error.message });
+                }
+
+                setTimeout(() => setMessage(null), 3000);
+            };
+
+            const updateAccount = async (id) => {
+                try {
+                    const response = await fetch(`/api/admin/accounts/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Basic ' + btoa('admin:' + adminPassword),
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        const updatedAccount = await response.json();
+                        setAccounts(accounts.map(acc => acc.id === id ? updatedAccount : acc));
+                        setEditingId(null);
+                        setFormData({
+                            firstName: '',
+                            lastName: '',
+                            phoneNumber: '',
+                            address: ''
+                        });
+                        setMessage({ type: 'success', text: 'Account updated successfully!' });
+                    }
+                } catch (error) {
+                    setMessage({ type: 'error', text: 'Update failed: ' + error.message });
+                }
+
+                setTimeout(() => setMessage(null), 3000);
+            };
+
+            const deleteAccount = async (id) => {
+                if (!confirm('Are you sure you want to delete this account?')) return;
+
+                try {
+                    const response = await fetch(`/api/admin/accounts/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Basic ' + btoa('admin:' + adminPassword)
+                        }
+                    });
+
+                    if (response.ok) {
+                        setAccounts(accounts.filter(acc => acc.id !== id));
+                        setMessage({ type: 'success', text: 'Account deleted successfully!' });
+                    }
+                } catch (error) {
+                    setMessage({ type: 'error', text: 'Delete failed: ' + error.message });
+                }
+
+                setTimeout(() => setMessage(null), 3000);
+            };
+
+            const startEdit = (account) => {
+                setEditingId(account.id);
+                setFormData({
+                    firstName: account.firstName,
+                    lastName: account.lastName,
+                    phoneNumber: account.phoneNumber,
+                    address: account.address
+                });
+            };
+
+            const cancelEdit = () => {
+                setEditingId(null);
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    phoneNumber: '',
+                    address: ''
+                });
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <div className="logo">GULF RACING</div>
+                        <div className="tagline">Account Management System</div>
+                    </div>
+
+                    <div className="racing-stripe"></div>
+
+                    <div className="tab-container">
+                        <div
+                            className={`tab ${activeTab === 'create' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('create')}
+                        >
+                            Create Account
+                        </div>
+                        <div
+                            className={`tab ${activeTab === 'admin' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('admin')}
+                        >
+                            Admin Dashboard
+                        </div>
+                    </div>
+
+                    {message && (
+                        <div className={message.type === 'success' ? 'success-message' : 'error-message'}>
+                            {message.text}
+                        </div>
+                    )}
+
+                    {activeTab === 'create' && (
+                        <div className="card">
+                            <h2 style={{marginBottom: '1.5rem', color: 'var(--gulf-blue)', fontFamily: "'Racing Sans One', cursive"}}>
+                                Register Your Account
+                            </h2>
+                            <form onSubmit={createAccount}>
+                                <div className="form-group">
+                                    <label>First Name</label>
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Last Name</label>
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Address</label>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-primary">
+                                    Create Account
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {activeTab === 'admin' && (
+                        <div className="card">
+                            {!isAuthenticated ? (
+                                <>
+                                    <h2 style={{marginBottom: '1.5rem', color: 'var(--gulf-blue)', fontFamily: "'Racing Sans One', cursive"}}>
+                                        Admin Login
+                                    </h2>
+                                    <form onSubmit={loginAdmin}>
+                                        <div className="form-group">
+                                            <label>Password</label>
+                                            <input
+                                                type="password"
+                                                value={adminPassword}
+                                                onChange={(e) => setAdminPassword(e.target.value)}
+                                                required
+                                                placeholder="Enter admin password"
+                                            />
+                                        </div>
+                                        <button type="submit" className="btn btn-secondary">
+                                            Login
+                                        </button>
+                                    </form>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem'}}>
+                                        <h2 style={{color: 'var(--gulf-blue)', fontFamily: "'Racing Sans One', cursive", margin: 0}}>
+                                            Manage Accounts
+                                        </h2>
+                                        <button
+                                            onClick={() => {
+                                                setIsAuthenticated(false);
+                                                setAdminPassword('');
+                                                setAccounts([]);
+                                            }}
+                                            className="btn btn-primary"
+                                            style={{padding: '0.5rem 1.5rem', fontSize: '0.9rem'}}
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                    <div className="account-list">
+                                        {accounts.map(account => (
+                                            <div key={account.id} className={`account-item ${editingId === account.id ? 'edit-mode' : ''}`}>
+                                                {editingId === account.id ? (
+                                                    <div>
+                                                        <div className="form-group">
+                                                            <label>First Name</label>
+                                                            <input
+                                                                type="text"
+                                                                name="firstName"
+                                                                value={formData.firstName}
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </div>
+                                                        <div className="form-group">
+                                                            <label>Last Name</label>
+                                                            <input
+                                                                type="text"
+                                                                name="lastName"
+                                                                value={formData.lastName}
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </div>
+                                                        <div className="form-group">
+                                                            <label>Phone</label>
+                                                            <input
+                                                                type="tel"
+                                                                name="phoneNumber"
+                                                                value={formData.phoneNumber}
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </div>
+                                                        <div className="form-group">
+                                                            <label>Address</label>
+                                                            <input
+                                                                type="text"
+                                                                name="address"
+                                                                value={formData.address}
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </div>
+                                                        <div className="button-group">
+                                                            <button
+                                                                onClick={() => updateAccount(account.id)}
+                                                                className="btn btn-secondary"
+                                                                style={{flex: 1}}
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                onClick={cancelEdit}
+                                                                className="btn btn-primary"
+                                                                style={{flex: 1}}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="account-info">
+                                                            <div>
+                                                                <div className="info-label">Name</div>
+                                                                <div className="info-value">{account.firstName} {account.lastName}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="info-label">Phone</div>
+                                                                <div className="info-value">{account.phoneNumber}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="info-label">Address</div>
+                                                                <div className="info-value">{account.address}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="info-label">ID</div>
+                                                                <div className="info-value">#{account.id}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="button-group">
+                                                            <button
+                                                                onClick={() => startEdit(account)}
+                                                                className="btn btn-secondary"
+                                                                style={{flex: 1}}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                onClick={() => deleteAccount(account.id)}
+                                                                className="btn btn-primary"
+                                                                style={{flex: 1}}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))}
+                                        {accounts.length === 0 && (
+                                            <p style={{textAlign: 'center', color: 'var(--gulf-blue)', fontSize: '1.2rem'}}>
+                                                No accounts yet. Create one in the other tab!
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
