@@ -1,0 +1,6 @@
+{
+  "name": "newproject",
+  "version": "0.1.0",
+  "description": "Spring Boot application with Tessl",
+  "dependencies": {}
+}
