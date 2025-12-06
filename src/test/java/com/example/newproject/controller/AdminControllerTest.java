@@ -130,11 +130,11 @@ class AdminControllerTest {
         String jsonBody = objectMapper.writeValueAsString(updateData);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/admin/accounts/" + saved.getId()))
-                .header("Content-Type", "application/json")
+            .uri(URI.create(baseUrl + "/api/admin/accounts/" + saved.getId()))
+            .header("Content-Type", "application/json")
             .header("Authorization", getBasicAuthHeader())
-                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
+            .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+            .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -165,7 +165,7 @@ class AdminControllerTest {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(400, response.statusCode());
-        assertTrue(response.body().contains("Invalid phone number format"));
+        assertTrue(response.body().contains("Phone number must be in format"));
     }
 
     @Test

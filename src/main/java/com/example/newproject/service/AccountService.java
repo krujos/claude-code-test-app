@@ -19,7 +19,6 @@ public class AccountService {
     }
 
     public Account createAccount(Account account) {
-        validateAccount(account);
         return accountRepository.save(account);
     }
 
@@ -33,21 +32,17 @@ public class AccountService {
     }
 
     public Account updateAccount(Long id, Account accountDetails) {
-        validateAccount(accountDetails);
         Account account = getAccountById(id);
         account.setFirstName(accountDetails.getFirstName());
         account.setLastName(accountDetails.getLastName());
         account.setPhoneNumber(accountDetails.getPhoneNumber());
         account.setAddress(accountDetails.getAddress());
+        account.setApartmentNumber(accountDetails.getApartmentNumber());
         return accountRepository.save(account);
     }
 
-    private void validateAccount(Account account) {
-        if (!PhoneNumberValidator.isValidPhoneNumber(account.getPhoneNumber())) {
-            String errorMessage = PhoneNumberValidator.getValidationErrorMessage(account.getPhoneNumber());
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
+    // Validation is handled by Bean Validation (@Valid) at the controller layer.
+    // Service methods assume input has been validated and perform persistence-only duties.
 
     public void deleteAccount(Long id) {
         accountRepository.deleteById(id);
