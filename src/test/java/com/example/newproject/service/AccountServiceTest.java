@@ -148,4 +148,82 @@ class AccountServiceTest {
         assertEquals("+33 1 42 86 82 00", created.getPhoneNumber());
         verify(accountRepository, times(1)).save(internationalAccount);
     }
+
+    @Test
+    void testCreateAccountWithApartmentNumber() {
+        Account accountWithApt = new Account();
+        accountWithApt.setFirstName("Jane");
+        accountWithApt.setLastName("Smith");
+        accountWithApt.setPhoneNumber("(415) 789-0123");
+        accountWithApt.setAddress("456 Oak Ave");
+        accountWithApt.setApartmentNumber("Apt 4B");
+
+        when(accountRepository.save(any(Account.class))).thenReturn(accountWithApt);
+
+        Account created = accountService.createAccount(accountWithApt);
+
+        assertNotNull(created);
+        assertEquals("Apt 4B", created.getApartmentNumber());
+        verify(accountRepository, times(1)).save(accountWithApt);
+    }
+
+    @Test
+    void testCreateAccountWithoutApartmentNumber() {
+        Account accountWithoutApt = new Account();
+        accountWithoutApt.setFirstName("Bob");
+        accountWithoutApt.setLastName("Johnson");
+        accountWithoutApt.setPhoneNumber("(650) 555-1234");
+        accountWithoutApt.setAddress("789 Elm St");
+
+        when(accountRepository.save(any(Account.class))).thenReturn(accountWithoutApt);
+
+        Account created = accountService.createAccount(accountWithoutApt);
+
+        assertNotNull(created);
+        assertNull(created.getApartmentNumber());
+        verify(accountRepository, times(1)).save(accountWithoutApt);
+    }
+
+    @Test
+    void testUpdateAccountWithApartmentNumber() {
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(validAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(validAccount);
+
+        Account updateData = new Account();
+        updateData.setFirstName("John");
+        updateData.setLastName("Doe");
+        updateData.setPhoneNumber("(212) 456-7890");
+        updateData.setAddress("123 Main St");
+        updateData.setApartmentNumber("Unit 202");
+
+        Account updated = accountService.updateAccount(1L, updateData);
+
+        assertNotNull(updated);
+        verify(accountRepository, times(1)).save(any(Account.class));
+    }
+
+    @Test
+    void testUpdateAccountRemovingApartmentNumber() {
+        Account accountWithApt = new Account();
+        accountWithApt.setFirstName("John");
+        accountWithApt.setLastName("Doe");
+        accountWithApt.setPhoneNumber("(212) 456-7890");
+        accountWithApt.setAddress("123 Main St");
+        accountWithApt.setApartmentNumber("Apt 5A");
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(accountWithApt));
+        when(accountRepository.save(any(Account.class))).thenReturn(accountWithApt);
+
+        Account updateData = new Account();
+        updateData.setFirstName("John");
+        updateData.setLastName("Doe");
+        updateData.setPhoneNumber("(212) 456-7890");
+        updateData.setAddress("123 Main St");
+        updateData.setApartmentNumber(null);
+
+        Account updated = accountService.updateAccount(1L, updateData);
+
+        assertNotNull(updated);
+        verify(accountRepository, times(1)).save(any(Account.class));
+    }
 }
