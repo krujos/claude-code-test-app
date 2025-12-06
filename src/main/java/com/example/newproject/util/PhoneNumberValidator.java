@@ -51,15 +51,10 @@ public class PhoneNumberValidator {
             return "Phone number is required";
         }
 
-        try {
-            PhoneNumber number = phoneUtil.parse(phoneNumber, "US");
-            if (!phoneUtil.isValidNumber(number)) {
-                return "Invalid phone number format. Please enter a valid phone number with country code (e.g., +1 555-123-4567)";
-            }
-        } catch (NumberParseException e) {
-            return "Invalid phone number format. Please enter a valid phone number with country code (e.g., +1 555-123-4567)";
+        if (isValidPhoneNumber(phoneNumber)) {
+            return null;
         }
 
-        return null;
+        return "Invalid phone number format. Please enter a valid phone number with country code (e.g., +1 555-123-4567)";
     }
 }
