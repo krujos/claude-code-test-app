@@ -593,7 +593,8 @@
                 firstName: '',
                 lastName: '',
                 phoneNumber: '',
-                address: ''
+                address: '',
+                apartmentNumber: ''
             });
             const [country, setCountry] = useState('US');
             const [phoneError, setPhoneError] = useState(null);
@@ -660,7 +661,8 @@
                             firstName: '',
                             lastName: '',
                             phoneNumber: '',
-                            address: ''
+                            address: '',
+                            apartmentNumber: ''
                         });
                         setPhoneError(null);
                     } else {
@@ -723,7 +725,8 @@
                             firstName: '',
                             lastName: '',
                             phoneNumber: '',
-                            address: ''
+                            address: '',
+                            apartmentNumber: ''
                         });
                         setPhoneError(null);
                         setMessage({ type: 'success', text: 'Account updated successfully!' });
@@ -766,7 +769,8 @@
                     firstName: account.firstName,
                     lastName: account.lastName,
                     phoneNumber: account.phoneNumber,
-                    address: account.address
+                    address: account.address,
+                    apartmentNumber: account.apartmentNumber || ''
                 });
                 setPhoneError(null);
             };
@@ -777,7 +781,8 @@
                     firstName: '',
                     lastName: '',
                     phoneNumber: '',
-                    address: ''
+                    address: '',
+                    apartmentNumber: ''
                 });
                 setPhoneError(null);
             };
@@ -856,6 +861,16 @@
                                     <AddressAutocomplete
                                         value={formData.address}
                                         onChange={(address) => setFormData({...formData, address})}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Apartment / Unit # (optional)</label>
+                                    <input
+                                        type="text"
+                                        name="apartmentNumber"
+                                        value={formData.apartmentNumber}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., Apt 4B, Unit 202"
                                     />
                                 </div>
                                 <button type="submit" className="btn btn-primary" disabled={phoneError !== null}>
@@ -949,6 +964,16 @@
                                                                 onChange={(address) => setFormData({...formData, address})}
                                                             />
                                                         </div>
+                                                        <div className="form-group">
+                                                            <label>Apartment / Unit # (optional)</label>
+                                                            <input
+                                                                type="text"
+                                                                name="apartmentNumber"
+                                                                value={formData.apartmentNumber}
+                                                                onChange={handleInputChange}
+                                                                placeholder="e.g., Apt 4B, Unit 202"
+                                                            />
+                                                        </div>
                                                         <div className="button-group">
                                                             <button
                                                                 onClick={() => updateAccount(account.id)}
@@ -980,7 +1005,10 @@
                                                             </div>
                                                             <div>
                                                                 <div className="info-label">Address</div>
-                                                                <div className="info-value">{account.address}</div>
+                                                                <div className="info-value">
+                                                                    {account.address}
+                                                                    {account.apartmentNumber && `, ${account.apartmentNumber}`}
+                                                                </div>
                                                             </div>
                                                             <div>
                                                                 <div className="info-label">ID</div>

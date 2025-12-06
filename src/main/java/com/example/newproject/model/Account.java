@@ -22,6 +22,9 @@ public class Account {
     @Column(nullable = false)
     private String address;
 
+    @Column(nullable = true)
+    private String apartmentNumber;
+
     public Account() {
     }
 
@@ -70,5 +73,13 @@ public class Account {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getApartmentNumber() {
+        return apartmentNumber;
+    }
+
+    public void setApartmentNumber(String apartmentNumber) {
+        this.apartmentNumber = apartmentNumber;
     }
 }
