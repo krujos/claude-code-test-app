@@ -165,7 +165,7 @@ class AdminControllerTest {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(400, response.statusCode());
-        assertTrue(response.body().contains("Phone number must be in format"));
+        assertTrue(response.body().contains("Invalid phone number format"));
     }
 
     @Test

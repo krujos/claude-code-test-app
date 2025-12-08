@@ -1,8 +1,8 @@
 package com.example.newproject.model;
 
+import com.example.newproject.validation.ValidPhoneNumber;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -23,7 +23,7 @@ public class Account {
 
     @Column(nullable = false)
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "\\(\\d{3}\\) \\d{3}-\\d{4}", message = "Phone number must be in format (NNN) NNN-NNNN")
+    @ValidPhoneNumber
     private String phoneNumber;
 
     @Column(nullable = false)
